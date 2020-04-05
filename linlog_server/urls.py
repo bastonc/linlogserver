@@ -16,7 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+
 urlpatterns = [
-    path('lin-log-update/', include('telnet_server.urls')),
+    path ('', include('telnet_server.urls')),
+    #path('lin-log-update/', include('telnet_server.urls')),
     path('admin/', admin.site.urls),
 ]

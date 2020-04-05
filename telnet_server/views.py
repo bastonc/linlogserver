@@ -5,8 +5,15 @@ from django.utils import timezone
 from .models import Chek_update, Register_new, Version, Template, Admins
 from django.contrib.auth import authenticate, login, logout
 
+def htu(request):
+    template_data = Template.objects.filter(page_name="htu")
+    template_context = {'template': template_data[0], 'today_year': timezone.now().year}
+    return HttpResponse(render(request, "telnet_server/htu.html", template_context))
+
 def index(request):
-    return HttpResponse("Hello, world. You're at the Telnet_server index.")
+    template_data = Template.objects.filter(page_name="main")
+    template_context = {'template': template_data[0], 'today_year': timezone.now().year}
+    return HttpResponse(render(request, "telnet_server/index.html", template_context))
 
 
 def updater(request, version_input, call_input):
@@ -33,7 +40,7 @@ def updater(request, version_input, call_input):
             context = {'version_list': new_version_list}
             check_user = Chek_update(call=call_input, timestamp=timezone.now(), version=version_input)
             check_user.save()
-            return HttpResponse(render(request, 'telnet_server/index.html', context))
+            return HttpResponse(render(request, 'telnet_server/versions.html', context))
         elif flag == 2:
             return HttpResponse(render(request, 'telnet_server/nonew.html'))
         else:
