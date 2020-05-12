@@ -22,6 +22,8 @@ class Template(models.Model):
     description = models.CharField(max_length=500)
     footer = models.fields.TextField(max_length=1000)
     h1 = models.CharField(max_length=300)
+    content_left_panel = models.TextField(max_length=10000)
+    content_right_panel = models.TextField(max_length=10000)
     timestamp = models.DateTimeField("Time edit")
 
 class Admins(models.Model):

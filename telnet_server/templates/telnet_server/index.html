@@ -76,9 +76,9 @@
 	<div class="row">
 		<div class="col-md-6">
 		<div class="content" >
-			<div class="right">
-
-			<h3>Download:</h3>
+			<div class="left">
+			{{ template.content_left_panel | safe }}
+			<!--h3>Download:</h3>
 				<strong> LinuxLog v1.23 </strong>
 			<p class="options"><em>Latest version</em></p>
 			<p>
@@ -166,7 +166,7 @@
 			<a href = "https://drive.google.com/file/d/1WGVYGw86x4ptZ7Iewn8xyu0hksnAG2TB/view" target="_blank">
 				Download link</a>  - for fedora 31
 			</p>
-			<hr>
+			<hr-->
 
 		</div>
 
@@ -174,8 +174,9 @@
 		</div>
 		<div class="col-md-6">
 		<div class="content" >
-			<div class="left">
-			<h3>All function in last version:</h3>
+			<div class="right">
+				{{ template.content_right_panel | safe }}
+			<!--h3>All function in last version:</h3>
 			<ul class="">
 				<li class="">Entry QSO to base</li>
 				<li>Search repeat QSO</li>
@@ -215,7 +216,7 @@
 					<li>Wayland</li>
 					<li> RAM 100 Mb and higer.  RAM is using in direct ratio with quantity of records in your Log (in log.adi file).</li>
 					<em>If your system does not have these dependencies, please download an alternative version for your system (only v1.01).</em>
-			<hr>
+			<hr-->
 		</div>
 		</div>
 
