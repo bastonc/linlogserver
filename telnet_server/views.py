@@ -1,9 +1,18 @@
+from django.forms import model_to_dict
+from rest_framework import generics
 from django.shortcuts import render, HttpResponse
 from django.template import loader
 from django.http import Http404, HttpResponseRedirect
 from django.utils import timezone
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from .models import Chek_update, Register_new, Version, Template, Admins
 from django.contrib.auth import authenticate, login, logout
+
+from .serializers import UpdaterSerializer, Check_updateSerializer
+from .utils.updater import check_update
+
 
 def htu(request):
     template_data = Template.objects.filter(page_name="htu")
@@ -17,37 +26,14 @@ def index(request):
 
 
 def updater(request, version_input, call_input):
-    flag=0
-    new_version_list = []
-    print(call_input)
-    try:
-        version_list = Version.objects.all()
-        for ver in version_list:
-            version_url =float(version_input)
-            version_in_base = float(ver.version)
+    new_version = check_update(float(version_input))
+    if new_version:
+        check_user = Chek_update(call=call_input, timestamp=timezone.now(), version=version_input)
+        check_user.save()
+        context = {'version': new_version}
+        return HttpResponse(render(request, 'telnet_server/versions.html', context))
+    return HttpResponse(render(request, 'telnet_server/nonew.html'))
 
-            if version_in_base > version_url:
-                new_version_list.append(ver)
-                new_version_list.reverse()
-                #new_version_list.sort()
-                #sorted(new_version_list)
-
-                flag = 1
-            if version_in_base == version_url and flag == 0:
-                flag = 2
-
-        if flag == 1:
-            context = {'version_list': new_version_list}
-            check_user = Chek_update(call=call_input, timestamp=timezone.now(), version=version_input)
-            check_user.save()
-            return HttpResponse(render(request, 'telnet_server/versions.html', context))
-        elif flag == 2:
-            return HttpResponse(render(request, 'telnet_server/nonew.html'))
-        else:
-            return HttpResponse(render(request, "telnet_server/nothing.html"))
-    except:
-        raise Http404("Oops. We have a problem")
-# Create your views here.
 
 def login (request):
     if request.user.is_authenticated:
@@ -60,8 +46,8 @@ def login (request):
 
         return HttpResponse(render(request, "telnet_server/login.html", template_context))
 
-def enter(request):
 
+def enter(request):
 
         if request.user.is_authenticated:
                 template = Template.objects.filter(page_name="admin_page")
@@ -89,15 +75,63 @@ def enter(request):
 
             #if request.user.is_authenticated:
 
-
-
-
 def logout_view(request):
     logout(request)
     template = Template.objects.filter(page_name="admin_page")
     context = {'template': template[0]}
     return HttpResponse(render(request, "telnet_server/login.html", context))
 
+
+class UpdaterAPIView(APIView):
+
+    def get(self, request, version_current, callsign):
+        # print(request.auth, request.data, request.query_params)
+        version_model = Version.objects.filter(version__gt=float(version_current)).order_by("-version").values()
+        if version_model:
+            # check_user = Chek_update(call=callsign, timestamp=timezone.now(), version=version_current)
+            # check_user.save()
+            version_model[0]["status"] = True
+            return Response(version_model[0])
+        return Response({"status": False})
+
+
+class RegisterUpdateComplete(APIView):
+    def post(self, request):
+        print(timezone.now().strftime("%Y-%m-%d %H:%M"))
+        update_serializer = Check_updateSerializer(data=request.data)
+        update_serializer.is_valid(raise_exception=True)
+        update_serializer.save()
+        return Response({"data": update_serializer.data})
+
+
+    def delete(self, request, *args, **kwargs):
+        print(request.query_params.get('start'), request.query_params.get('end'))
+        if request.query_params.get('start') is not None and request.query_params.get('end') is not None:
+            delete_data_list = []
+            for pk in range(int(request.query_params["start"]), int(request.query_params["end"])):
+                instance_query_set = Chek_update.objects.filter(pk=pk)
+                if instance_query_set:
+                    instance = instance_query_set.get()
+                    delete = Check_updateSerializer(instance=instance)
+                    delete.delete(instance=instance)
+                    delete_data_list.append(delete.data)
+            return Response({"data": delete_data_list})
+        pk = kwargs.get("pk", None)
+        if pk:
+            try:
+                instance = Chek_update.objects.filter(pk=pk).get()
+                delete = Check_updateSerializer(instance=instance)
+                delete.delete(instance=instance)
+                return Response({"data": delete.data})
+            except BaseException:
+                return Response({"error": "Object does not exist"})
+        return Response({"error": "Wrong query. No pk"})
+
+
+
+# class UpdaterAPIView(generics.ListAPIView):
+#     queryset = Version.objects.all()
+#     serializer_class = UpdaterSerializer
 
 
 

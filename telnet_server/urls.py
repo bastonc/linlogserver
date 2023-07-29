@@ -17,6 +17,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 from django.urls import path
 from . import views
+from .views import UpdaterAPIView, RegisterUpdateComplete
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -24,7 +25,10 @@ urlpatterns = [
     path('upd/<str:version_input>/<str:call_input>', views.updater, name='upd'),
     path('login', views.login, name='login'),
     path('enter', views.enter, name="enter"),
-    path('logout', views.logout_view, name="logout")
+    path('logout', views.logout_view, name="logout"),
+    path('api/v1/updater/<str:version_current>/<str:callsign>', UpdaterAPIView.as_view(), name="request_update"),
+    path('api/v1/update-register', RegisterUpdateComplete.as_view(), name="update_complete"),
+    path('api/v1/update-register/<int:pk>', RegisterUpdateComplete.as_view(), name="update_delete")
 
 
 ] + static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS)

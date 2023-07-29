@@ -1,8 +1,6 @@
-{% if version_list %}
+{% if version %}
     <table>
-    {% for versions in version_list %}
-        <tr><td><span id="version">{{versions.version}}</span></td><td><span id="git_path">{{versions.github_path}}</span></td><td><span id="date">{{versions.timestamp}}</span></td></tr>
-    {% endfor %}
+        <tr><td><span id="version">{{version.version}}</span></td><td><span id="git_path">{{version.github_path}}</span></td><td><span id="date">{{version.timestamp}}</span></td></tr>
     </table>
 {% else %}
         <p> No record versions </p>

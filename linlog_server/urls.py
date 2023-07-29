@@ -18,7 +18,7 @@ from django.urls import path, include
 
 
 urlpatterns = [
-    path ('', include('telnet_server.urls')),
+    path('', include('telnet_server.urls')),
     #path('lin-log-update/', include('telnet_server.urls')),
     path('admin/', admin.site.urls),
 ]

@@ -1,9 +1,11 @@
 from django.db import models
+from django.utils import timezone
+
 
 # Create your models here.
 class Chek_update(models.Model):
     version = models.CharField(max_length=50)
-    timestamp = models.DateTimeField("Time request")
+    timestamp = models.DateTimeField("Time request", default=timezone.now())
     call = models.CharField(max_length=10)
 
 class Register_new (models.Model):
@@ -15,6 +17,7 @@ class Version(models.Model):
     timestamp = models.DateTimeField("Time_new")
     version = models.CharField(max_length=10)
     github_path = models.CharField(max_length=255)
+    enable = models.BooleanField(default=False)
 
 class Template(models.Model):
     page_name = models.CharField(max_length=300)
