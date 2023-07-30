@@ -4,8 +4,10 @@ from django.shortcuts import render, HttpResponse
 from django.template import loader
 from django.http import Http404, HttpResponseRedirect
 from django.utils import timezone
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import permission_classes
 
 from .models import Chek_update, Register_new, Version, Template, Admins
 from django.contrib.auth import authenticate, login, logout
@@ -96,6 +98,7 @@ class UpdaterAPIView(APIView):
 
 
 class RegisterUpdateComplete(APIView):
+    # permission_classes = [IsAdminUser]
     def post(self, request):
         print(timezone.now().strftime("%Y-%m-%d %H:%M"))
         update_serializer = Check_updateSerializer(data=request.data)
@@ -103,30 +106,30 @@ class RegisterUpdateComplete(APIView):
         update_serializer.save()
         return Response({"data": update_serializer.data})
 
-
     def delete(self, request, *args, **kwargs):
-        print(request.query_params.get('start'), request.query_params.get('end'))
-        if request.query_params.get('start') is not None and request.query_params.get('end') is not None:
-            delete_data_list = []
-            for pk in range(int(request.query_params["start"]), int(request.query_params["end"])):
-                instance_query_set = Chek_update.objects.filter(pk=pk)
-                if instance_query_set:
-                    instance = instance_query_set.get()
+        if request.user.is_superuser:
+            print(request.query_params.get('start'), request.query_params.get('end'))
+            if request.query_params.get('start') is not None and request.query_params.get('end') is not None:
+                delete_data_list = []
+                for pk in range(int(request.query_params["start"]), int(request.query_params["end"])):
+                    instance_query_set = Chek_update.objects.filter(pk=pk)
+                    if instance_query_set:
+                        instance = instance_query_set.get()
+                        delete = Check_updateSerializer(instance=instance)
+                        delete.delete(instance=instance)
+                        delete_data_list.append(delete.data)
+                return Response({"data": delete_data_list})
+            pk = kwargs.get("pk", None)
+            if pk:
+                try:
+                    instance = Chek_update.objects.filter(pk=pk).get()
                     delete = Check_updateSerializer(instance=instance)
                     delete.delete(instance=instance)
-                    delete_data_list.append(delete.data)
-            return Response({"data": delete_data_list})
-        pk = kwargs.get("pk", None)
-        if pk:
-            try:
-                instance = Chek_update.objects.filter(pk=pk).get()
-                delete = Check_updateSerializer(instance=instance)
-                delete.delete(instance=instance)
-                return Response({"data": delete.data})
-            except BaseException:
-                return Response({"error": "Object does not exist"})
-        return Response({"error": "Wrong query. No pk"})
-
+                    return Response({"data": delete.data})
+                except BaseException:
+                    return Response({"error": "Object does not exist"})
+            return Response({"error": "Wrong query. No pk"})
+        return Response({"error":"Access denied"})
 
 
 # class UpdaterAPIView(generics.ListAPIView):
